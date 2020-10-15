@@ -3,6 +3,7 @@ package pb;
 
 service Peticion{
         rpc RealizarPeticion(Objeto) returns(Serie) {}
+        rpc PedirEstado(Serie) returns(Estado) {}
 }
 message Objeto {
         string id = 1;
@@ -14,4 +15,7 @@ message Objeto {
 }
 message Serie{
         int32 serie = 1;
+}
+message Estado{
+        string estado = 1;
 }

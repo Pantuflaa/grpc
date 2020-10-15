@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PeticionClient interface {
 	RealizarPeticion(ctx context.Context, in *Objeto, opts ...grpc.CallOption) (*Serie, error)
+	PedirEstado(ctx context.Context, in *Serie, opts ...grpc.CallOption) (*Estado, error)
 }
 
 type peticionClient struct {
@@ -37,11 +38,21 @@ func (c *peticionClient) RealizarPeticion(ctx context.Context, in *Objeto, opts 
 	return out, nil
 }
 
+func (c *peticionClient) PedirEstado(ctx context.Context, in *Serie, opts ...grpc.CallOption) (*Estado, error) {
+	out := new(Estado)
+	err := c.cc.Invoke(ctx, "/pb.Peticion/PedirEstado", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PeticionServer is the server API for Peticion service.
 // All implementations must embed UnimplementedPeticionServer
 // for forward compatibility
 type PeticionServer interface {
 	RealizarPeticion(context.Context, *Objeto) (*Serie, error)
+	PedirEstado(context.Context, *Serie) (*Estado, error)
 	mustEmbedUnimplementedPeticionServer()
 }
 
@@ -51,6 +62,9 @@ type UnimplementedPeticionServer struct {
 
 func (UnimplementedPeticionServer) RealizarPeticion(context.Context, *Objeto) (*Serie, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RealizarPeticion not implemented")
+}
+func (UnimplementedPeticionServer) PedirEstado(context.Context, *Serie) (*Estado, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PedirEstado not implemented")
 }
 func (UnimplementedPeticionServer) mustEmbedUnimplementedPeticionServer() {}
 
@@ -83,6 +97,24 @@ func _Peticion_RealizarPeticion_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Peticion_PedirEstado_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Serie)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeticionServer).PedirEstado(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Peticion/PedirEstado",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeticionServer).PedirEstado(ctx, req.(*Serie))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Peticion_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Peticion",
 	HandlerType: (*PeticionServer)(nil),
@@ -90,6 +122,10 @@ var _Peticion_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RealizarPeticion",
 			Handler:    _Peticion_RealizarPeticion_Handler,
+		},
+		{
+			MethodName: "PedirEstado",
+			Handler:    _Peticion_PedirEstado_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
