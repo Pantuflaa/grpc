@@ -4,6 +4,8 @@ package pb;
 service Peticion{
         rpc RealizarPeticion(Objeto) returns(Serie) {}
         rpc PedirEstado(Serie) returns(Estado) {}
+        rpc ActualizarEstado(ActEstado) returns() {}
+        rpc PedirPaquete(ActEstado) returns(infoPaquete) {}
 }
 message Objeto {
         string id = 1;
@@ -18,4 +20,16 @@ message Serie{
 }
 message Estado{
         string estado = 1;
+}
+message ActEstado{
+        string id = 1;
+        string estado = 2;
+}
+message infoPaquete{
+        string id = 1;
+        string tipo = 2;
+        int32 valor = 3;
+        string origen = 4;
+        string destino = 5;
+        int32 intentos = 6;
 }
