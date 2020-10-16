@@ -19,6 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 type PeticionClient interface {
 	RealizarPeticion(ctx context.Context, in *Objeto, opts ...grpc.CallOption) (*Serie, error)
 	PedirEstado(ctx context.Context, in *Serie, opts ...grpc.CallOption) (*Estado, error)
+	ActualizarEstado(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*Estado, error)
+	PedirPaquete(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*InfoPaquete, error)
 }
 
 type peticionClient struct {
@@ -47,12 +49,32 @@ func (c *peticionClient) PedirEstado(ctx context.Context, in *Serie, opts ...grp
 	return out, nil
 }
 
+func (c *peticionClient) ActualizarEstado(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*Estado, error) {
+	out := new(Estado)
+	err := c.cc.Invoke(ctx, "/pb.Peticion/ActualizarEstado", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *peticionClient) PedirPaquete(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*InfoPaquete, error) {
+	out := new(InfoPaquete)
+	err := c.cc.Invoke(ctx, "/pb.Peticion/PedirPaquete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PeticionServer is the server API for Peticion service.
 // All implementations must embed UnimplementedPeticionServer
 // for forward compatibility
 type PeticionServer interface {
 	RealizarPeticion(context.Context, *Objeto) (*Serie, error)
 	PedirEstado(context.Context, *Serie) (*Estado, error)
+	ActualizarEstado(context.Context, *ActEstado) (*Estado, error)
+	PedirPaquete(context.Context, *ActEstado) (*InfoPaquete, error)
 	mustEmbedUnimplementedPeticionServer()
 }
 
@@ -65,6 +87,12 @@ func (UnimplementedPeticionServer) RealizarPeticion(context.Context, *Objeto) (*
 }
 func (UnimplementedPeticionServer) PedirEstado(context.Context, *Serie) (*Estado, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PedirEstado not implemented")
+}
+func (UnimplementedPeticionServer) ActualizarEstado(context.Context, *ActEstado) (*Estado, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActualizarEstado not implemented")
+}
+func (UnimplementedPeticionServer) PedirPaquete(context.Context, *ActEstado) (*InfoPaquete, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PedirPaquete not implemented")
 }
 func (UnimplementedPeticionServer) mustEmbedUnimplementedPeticionServer() {}
 
@@ -115,6 +143,42 @@ func _Peticion_PedirEstado_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Peticion_ActualizarEstado_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActEstado)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeticionServer).ActualizarEstado(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Peticion/ActualizarEstado",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeticionServer).ActualizarEstado(ctx, req.(*ActEstado))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Peticion_PedirPaquete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActEstado)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeticionServer).PedirPaquete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Peticion/PedirPaquete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeticionServer).PedirPaquete(ctx, req.(*ActEstado))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Peticion_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Peticion",
 	HandlerType: (*PeticionServer)(nil),
@@ -126,6 +190,14 @@ var _Peticion_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PedirEstado",
 			Handler:    _Peticion_PedirEstado_Handler,
+		},
+		{
+			MethodName: "ActualizarEstado",
+			Handler:    _Peticion_ActualizarEstado_Handler,
+		},
+		{
+			MethodName: "PedirPaquete",
+			Handler:    _Peticion_PedirPaquete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

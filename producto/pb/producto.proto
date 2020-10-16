@@ -4,7 +4,7 @@ package pb;
 service Peticion{
         rpc RealizarPeticion(Objeto) returns(Serie) {}
         rpc PedirEstado(Serie) returns(Estado) {}
-        rpc ActualizarEstado(ActEstado) returns() {}
+        rpc ActualizarEstado(ActEstado) returns(Estado) {}
         rpc PedirPaquete(ActEstado) returns(infoPaquete) {}
 }
 message Objeto {
