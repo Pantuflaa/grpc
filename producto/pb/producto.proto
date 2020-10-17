@@ -22,7 +22,7 @@ message Estado{
         string estado = 1;
 }
 message ActEstado{
-        string id = 1;
+        int32 seguimiento = 1;
         string estado = 2;
 }
 message infoPaquete{
@@ -32,4 +32,5 @@ message infoPaquete{
         string origen = 4;
         string destino = 5;
         int32 intentos = 6;
+        int32 seguimiento = 7;
 }
