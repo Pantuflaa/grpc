@@ -21,6 +21,7 @@ type PeticionClient interface {
 	PedirEstado(ctx context.Context, in *Serie, opts ...grpc.CallOption) (*Estado, error)
 	ActualizarEstado(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*Estado, error)
 	PedirPaquete(ctx context.Context, in *ActEstado, opts ...grpc.CallOption) (*InfoPaquete, error)
+	EnviarPaquete(ctx context.Context, in *Envio, opts ...grpc.CallOption) (*Estado, error)
 }
 
 type peticionClient struct {
@@ -67,6 +68,15 @@ func (c *peticionClient) PedirPaquete(ctx context.Context, in *ActEstado, opts .
 	return out, nil
 }
 
+func (c *peticionClient) EnviarPaquete(ctx context.Context, in *Envio, opts ...grpc.CallOption) (*Estado, error) {
+	out := new(Estado)
+	err := c.cc.Invoke(ctx, "/pb.Peticion/EnviarPaquete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PeticionServer is the server API for Peticion service.
 // All implementations must embed UnimplementedPeticionServer
 // for forward compatibility
@@ -75,6 +85,7 @@ type PeticionServer interface {
 	PedirEstado(context.Context, *Serie) (*Estado, error)
 	ActualizarEstado(context.Context, *ActEstado) (*Estado, error)
 	PedirPaquete(context.Context, *ActEstado) (*InfoPaquete, error)
+	EnviarPaquete(context.Context, *Envio) (*Estado, error)
 	mustEmbedUnimplementedPeticionServer()
 }
 
@@ -93,6 +104,9 @@ func (UnimplementedPeticionServer) ActualizarEstado(context.Context, *ActEstado)
 }
 func (UnimplementedPeticionServer) PedirPaquete(context.Context, *ActEstado) (*InfoPaquete, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PedirPaquete not implemented")
+}
+func (UnimplementedPeticionServer) EnviarPaquete(context.Context, *Envio) (*Estado, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnviarPaquete not implemented")
 }
 func (UnimplementedPeticionServer) mustEmbedUnimplementedPeticionServer() {}
 
@@ -179,6 +193,24 @@ func _Peticion_PedirPaquete_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Peticion_EnviarPaquete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Envio)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeticionServer).EnviarPaquete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Peticion/EnviarPaquete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeticionServer).EnviarPaquete(ctx, req.(*Envio))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Peticion_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Peticion",
 	HandlerType: (*PeticionServer)(nil),
@@ -198,6 +230,10 @@ var _Peticion_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PedirPaquete",
 			Handler:    _Peticion_PedirPaquete_Handler,
+		},
+		{
+			MethodName: "EnviarPaquete",
+			Handler:    _Peticion_EnviarPaquete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
