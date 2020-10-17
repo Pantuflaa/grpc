@@ -6,6 +6,7 @@ service Peticion{
         rpc PedirEstado(Serie) returns(Estado) {}
         rpc ActualizarEstado(ActEstado) returns(Estado) {}
         rpc PedirPaquete(ActEstado) returns(infoPaquete) {}
+        rpc EnviarPaquete(Envio) returns(Estado) {}
 }
 message Objeto {
         string id = 1;
@@ -24,6 +25,7 @@ message Estado{
 message ActEstado{
         int32 seguimiento = 1;
         string estado = 2;
+        int32 idCamion = 3;
 }
 message infoPaquete{
         string id = 1;
@@ -33,4 +35,10 @@ message infoPaquete{
         string destino = 5;
         int32 intentos = 6;
         int32 seguimiento = 7;
+}
+
+message Envio{
+        int32 seguimiento = 1;
+        int32 intentos = 2;
+        string estado = 3;
 }
