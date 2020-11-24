@@ -1,0 +1,16 @@
+syntax = "proto3";
+package pb;
+
+service Libros{
+        rpc GuardarLibro(stream ChunkLibro) returns(Mensaje) {}
+        rpc DescargarLibro(Mensaje) returns (stream ChunkLibro){}
+       
+}
+message ChunkLibro {
+        string nombre = 1;
+        int32 parte = 2;
+        bytes chunk = 3;     
+}
+message Mensaje{
+        string msg = 1;
+}
