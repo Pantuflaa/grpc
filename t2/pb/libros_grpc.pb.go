@@ -21,6 +21,7 @@ type LibrosClient interface {
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
 	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
 	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
+	Vivo(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 }
 
 type librosClient struct {
@@ -115,6 +116,15 @@ func (c *librosClient) PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc
 	return out, nil
 }
 
+func (c *librosClient) Vivo(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error) {
+	out := new(Mensaje)
+	err := c.cc.Invoke(ctx, "/pb.Libros/Vivo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LibrosServer is the server API for Libros service.
 // All implementations must embed UnimplementedLibrosServer
 // for forward compatibility
@@ -123,6 +133,7 @@ type LibrosServer interface {
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
 	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
 	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
+	Vivo(context.Context, *Mensaje) (*Mensaje, error)
 	mustEmbedUnimplementedLibrosServer()
 }
 
@@ -141,6 +152,9 @@ func (UnimplementedLibrosServer) Propuesta(context.Context, *Mensaje) (*RespProp
 }
 func (UnimplementedLibrosServer) PedirLibro(context.Context, *Mensaje) (*Mensaje, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PedirLibro not implemented")
+}
+func (UnimplementedLibrosServer) Vivo(context.Context, *Mensaje) (*Mensaje, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Vivo not implemented")
 }
 func (UnimplementedLibrosServer) mustEmbedUnimplementedLibrosServer() {}
 
@@ -238,6 +252,24 @@ func _Libros_PedirLibro_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Libros_Vivo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).Vivo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/Vivo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).Vivo(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Libros_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Libros",
 	HandlerType: (*LibrosServer)(nil),
@@ -249,6 +281,10 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PedirLibro",
 			Handler:    _Libros_PedirLibro_Handler,
+		},
+		{
+			MethodName: "Vivo",
+			Handler:    _Libros_Vivo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

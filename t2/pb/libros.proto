@@ -5,7 +5,8 @@ service Libros{
         rpc GuardarLibro(stream ChunkLibro) returns(Mensaje) {}
         rpc DescargarLibro(Mensaje) returns (stream ChunkLibro){}
         rpc Propuesta (Mensaje) returns (RespPropuesta){}
-        rpc PedirLibro (Mensaje) returns (Mensaje){}       
+        rpc PedirLibro (Mensaje) returns (Mensaje){}
+        rpc Vivo (Mensaje) returns (Mensaje){}       
 }
 message ChunkLibro {
         string nombre = 1;
