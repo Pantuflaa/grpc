@@ -19,6 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 type LibrosClient interface {
 	GuardarLibro(ctx context.Context, opts ...grpc.CallOption) (Libros_GuardarLibroClient, error)
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
+	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
+	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 }
 
 type librosClient struct {
@@ -95,12 +97,32 @@ func (x *librosDescargarLibroClient) Recv() (*ChunkLibro, error) {
 	return m, nil
 }
 
+func (c *librosClient) Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error) {
+	out := new(RespPropuesta)
+	err := c.cc.Invoke(ctx, "/pb.Libros/Propuesta", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *librosClient) PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error) {
+	out := new(Mensaje)
+	err := c.cc.Invoke(ctx, "/pb.Libros/PedirLibro", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LibrosServer is the server API for Libros service.
 // All implementations must embed UnimplementedLibrosServer
 // for forward compatibility
 type LibrosServer interface {
 	GuardarLibro(Libros_GuardarLibroServer) error
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
+	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
+	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
 	mustEmbedUnimplementedLibrosServer()
 }
 
@@ -113,6 +135,12 @@ func (UnimplementedLibrosServer) GuardarLibro(Libros_GuardarLibroServer) error {
 }
 func (UnimplementedLibrosServer) DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error {
 	return status.Errorf(codes.Unimplemented, "method DescargarLibro not implemented")
+}
+func (UnimplementedLibrosServer) Propuesta(context.Context, *Mensaje) (*RespPropuesta, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Propuesta not implemented")
+}
+func (UnimplementedLibrosServer) PedirLibro(context.Context, *Mensaje) (*Mensaje, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PedirLibro not implemented")
 }
 func (UnimplementedLibrosServer) mustEmbedUnimplementedLibrosServer() {}
 
@@ -174,10 +202,55 @@ func (x *librosDescargarLibroServer) Send(m *ChunkLibro) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Libros_Propuesta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).Propuesta(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/Propuesta",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).Propuesta(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Libros_PedirLibro_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).PedirLibro(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/PedirLibro",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).PedirLibro(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Libros_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Libros",
 	HandlerType: (*LibrosServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Propuesta",
+			Handler:    _Libros_Propuesta_Handler,
+		},
+		{
+			MethodName: "PedirLibro",
+			Handler:    _Libros_PedirLibro_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GuardarLibro",
