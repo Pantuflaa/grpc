@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LibrosClient interface {
 	GuardarLibro(ctx context.Context, opts ...grpc.CallOption) (Libros_GuardarLibroClient, error)
+	RecibirChunk(ctx context.Context, opts ...grpc.CallOption) (Libros_RecibirChunkClient, error)
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
 	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
 	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
@@ -66,8 +67,42 @@ func (x *librosGuardarLibroClient) CloseAndRecv() (*Mensaje, error) {
 	return m, nil
 }
 
+func (c *librosClient) RecibirChunk(ctx context.Context, opts ...grpc.CallOption) (Libros_RecibirChunkClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[1], "/pb.Libros/RecibirChunk", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &librosRecibirChunkClient{stream}
+	return x, nil
+}
+
+type Libros_RecibirChunkClient interface {
+	Send(*ChunkLibro) error
+	CloseAndRecv() (*Mensaje, error)
+	grpc.ClientStream
+}
+
+type librosRecibirChunkClient struct {
+	grpc.ClientStream
+}
+
+func (x *librosRecibirChunkClient) Send(m *ChunkLibro) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *librosRecibirChunkClient) CloseAndRecv() (*Mensaje, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Mensaje)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *librosClient) DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[1], "/pb.Libros/DescargarLibro", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[2], "/pb.Libros/DescargarLibro", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -130,6 +165,7 @@ func (c *librosClient) Vivo(ctx context.Context, in *Mensaje, opts ...grpc.CallO
 // for forward compatibility
 type LibrosServer interface {
 	GuardarLibro(Libros_GuardarLibroServer) error
+	RecibirChunk(Libros_RecibirChunkServer) error
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
 	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
 	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
@@ -143,6 +179,9 @@ type UnimplementedLibrosServer struct {
 
 func (UnimplementedLibrosServer) GuardarLibro(Libros_GuardarLibroServer) error {
 	return status.Errorf(codes.Unimplemented, "method GuardarLibro not implemented")
+}
+func (UnimplementedLibrosServer) RecibirChunk(Libros_RecibirChunkServer) error {
+	return status.Errorf(codes.Unimplemented, "method RecibirChunk not implemented")
 }
 func (UnimplementedLibrosServer) DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error {
 	return status.Errorf(codes.Unimplemented, "method DescargarLibro not implemented")
@@ -188,6 +227,32 @@ func (x *librosGuardarLibroServer) SendAndClose(m *Mensaje) error {
 }
 
 func (x *librosGuardarLibroServer) Recv() (*ChunkLibro, error) {
+	m := new(ChunkLibro)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _Libros_RecibirChunk_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LibrosServer).RecibirChunk(&librosRecibirChunkServer{stream})
+}
+
+type Libros_RecibirChunkServer interface {
+	SendAndClose(*Mensaje) error
+	Recv() (*ChunkLibro, error)
+	grpc.ServerStream
+}
+
+type librosRecibirChunkServer struct {
+	grpc.ServerStream
+}
+
+func (x *librosRecibirChunkServer) SendAndClose(m *Mensaje) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *librosRecibirChunkServer) Recv() (*ChunkLibro, error) {
 	m := new(ChunkLibro)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -291,6 +356,11 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GuardarLibro",
 			Handler:       _Libros_GuardarLibro_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "RecibirChunk",
+			Handler:       _Libros_RecibirChunk_Handler,
 			ClientStreams: true,
 		},
 		{
