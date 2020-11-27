@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type LibrosClient interface {
 	GuardarLibro(ctx context.Context, opts ...grpc.CallOption) (Libros_GuardarLibroClient, error)
 	RecibirChunk(ctx context.Context, opts ...grpc.CallOption) (Libros_RecibirChunkClient, error)
+	EscribemeLibro(ctx context.Context, in *Escritura, opts ...grpc.CallOption) (*Mensaje, error)
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
 	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
 	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
@@ -101,6 +102,15 @@ func (x *librosRecibirChunkClient) CloseAndRecv() (*Mensaje, error) {
 	return m, nil
 }
 
+func (c *librosClient) EscribemeLibro(ctx context.Context, in *Escritura, opts ...grpc.CallOption) (*Mensaje, error) {
+	out := new(Mensaje)
+	err := c.cc.Invoke(ctx, "/pb.Libros/EscribemeLibro", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *librosClient) DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[2], "/pb.Libros/DescargarLibro", opts...)
 	if err != nil {
@@ -166,6 +176,7 @@ func (c *librosClient) Vivo(ctx context.Context, in *Mensaje, opts ...grpc.CallO
 type LibrosServer interface {
 	GuardarLibro(Libros_GuardarLibroServer) error
 	RecibirChunk(Libros_RecibirChunkServer) error
+	EscribemeLibro(context.Context, *Escritura) (*Mensaje, error)
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
 	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
 	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
@@ -182,6 +193,9 @@ func (UnimplementedLibrosServer) GuardarLibro(Libros_GuardarLibroServer) error {
 }
 func (UnimplementedLibrosServer) RecibirChunk(Libros_RecibirChunkServer) error {
 	return status.Errorf(codes.Unimplemented, "method RecibirChunk not implemented")
+}
+func (UnimplementedLibrosServer) EscribemeLibro(context.Context, *Escritura) (*Mensaje, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EscribemeLibro not implemented")
 }
 func (UnimplementedLibrosServer) DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error {
 	return status.Errorf(codes.Unimplemented, "method DescargarLibro not implemented")
@@ -258,6 +272,24 @@ func (x *librosRecibirChunkServer) Recv() (*ChunkLibro, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func _Libros_EscribemeLibro_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Escritura)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).EscribemeLibro(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/EscribemeLibro",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).EscribemeLibro(ctx, req.(*Escritura))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Libros_DescargarLibro_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -339,6 +371,10 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Libros",
 	HandlerType: (*LibrosServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "EscribemeLibro",
+			Handler:    _Libros_EscribemeLibro_Handler,
+		},
 		{
 			MethodName: "Propuesta",
 			Handler:    _Libros_Propuesta_Handler,

@@ -4,10 +4,16 @@ package pb;
 service Libros{
         rpc GuardarLibro(stream ChunkLibro) returns(Mensaje) {}
         rpc RecibirChunk(stream ChunkLibro) returns(Mensaje) {}
+        rpc EscribemeLibro (Escritura) returns (Mensaje){}
         rpc DescargarLibro(Mensaje) returns (stream ChunkLibro){}
         rpc Propuesta (Mensaje) returns (RespPropuesta){}
         rpc PedirLibro (Mensaje) returns (Mensaje){}
         rpc Vivo (Mensaje) returns (Mensaje){}       
+}
+message Escritura {
+        string nombre = 1;
+        int32 cant = 2;
+        string orden = 3;
 }
 message ChunkLibro {
         string nombre = 1;
