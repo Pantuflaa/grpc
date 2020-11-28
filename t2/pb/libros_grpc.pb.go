@@ -20,6 +20,8 @@ type LibrosClient interface {
 	GuardarLibro(ctx context.Context, opts ...grpc.CallOption) (Libros_GuardarLibroClient, error)
 	RecibirChunk(ctx context.Context, opts ...grpc.CallOption) (Libros_RecibirChunkClient, error)
 	EscribemeLibro(ctx context.Context, in *Escritura, opts ...grpc.CallOption) (*Mensaje, error)
+	ListadoLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_ListadoLibroClient, error)
+	DameNodos(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
 	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
 	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
@@ -111,8 +113,49 @@ func (c *librosClient) EscribemeLibro(ctx context.Context, in *Escritura, opts .
 	return out, nil
 }
 
+func (c *librosClient) ListadoLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_ListadoLibroClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[2], "/pb.Libros/ListadoLibro", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &librosListadoLibroClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Libros_ListadoLibroClient interface {
+	Recv() (*Mensaje, error)
+	grpc.ClientStream
+}
+
+type librosListadoLibroClient struct {
+	grpc.ClientStream
+}
+
+func (x *librosListadoLibroClient) Recv() (*Mensaje, error) {
+	m := new(Mensaje)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *librosClient) DameNodos(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error) {
+	out := new(Mensaje)
+	err := c.cc.Invoke(ctx, "/pb.Libros/DameNodos", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *librosClient) DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[2], "/pb.Libros/DescargarLibro", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Libros_serviceDesc.Streams[3], "/pb.Libros/DescargarLibro", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -177,6 +220,8 @@ type LibrosServer interface {
 	GuardarLibro(Libros_GuardarLibroServer) error
 	RecibirChunk(Libros_RecibirChunkServer) error
 	EscribemeLibro(context.Context, *Escritura) (*Mensaje, error)
+	ListadoLibro(*Mensaje, Libros_ListadoLibroServer) error
+	DameNodos(context.Context, *Mensaje) (*Mensaje, error)
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
 	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
 	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
@@ -196,6 +241,12 @@ func (UnimplementedLibrosServer) RecibirChunk(Libros_RecibirChunkServer) error {
 }
 func (UnimplementedLibrosServer) EscribemeLibro(context.Context, *Escritura) (*Mensaje, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EscribemeLibro not implemented")
+}
+func (UnimplementedLibrosServer) ListadoLibro(*Mensaje, Libros_ListadoLibroServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListadoLibro not implemented")
+}
+func (UnimplementedLibrosServer) DameNodos(context.Context, *Mensaje) (*Mensaje, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DameNodos not implemented")
 }
 func (UnimplementedLibrosServer) DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error {
 	return status.Errorf(codes.Unimplemented, "method DescargarLibro not implemented")
@@ -292,6 +343,45 @@ func _Libros_EscribemeLibro_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Libros_ListadoLibro_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Mensaje)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LibrosServer).ListadoLibro(m, &librosListadoLibroServer{stream})
+}
+
+type Libros_ListadoLibroServer interface {
+	Send(*Mensaje) error
+	grpc.ServerStream
+}
+
+type librosListadoLibroServer struct {
+	grpc.ServerStream
+}
+
+func (x *librosListadoLibroServer) Send(m *Mensaje) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Libros_DameNodos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).DameNodos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/DameNodos",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).DameNodos(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Libros_DescargarLibro_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Mensaje)
 	if err := stream.RecvMsg(m); err != nil {
@@ -376,6 +466,10 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Libros_EscribemeLibro_Handler,
 		},
 		{
+			MethodName: "DameNodos",
+			Handler:    _Libros_DameNodos_Handler,
+		},
+		{
 			MethodName: "Propuesta",
 			Handler:    _Libros_Propuesta_Handler,
 		},
@@ -398,6 +492,11 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 			StreamName:    "RecibirChunk",
 			Handler:       _Libros_RecibirChunk_Handler,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "ListadoLibro",
+			Handler:       _Libros_ListadoLibro_Handler,
+			ServerStreams: true,
 		},
 		{
 			StreamName:    "DescargarLibro",

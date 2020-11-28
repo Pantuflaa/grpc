@@ -5,6 +5,8 @@ service Libros{
         rpc GuardarLibro(stream ChunkLibro) returns(Mensaje) {}
         rpc RecibirChunk(stream ChunkLibro) returns(Mensaje) {}
         rpc EscribemeLibro (Escritura) returns (Mensaje){}
+        rpc ListadoLibro (Mensaje) returns (stream Mensaje) {}
+        rpc DameNodos (Mensaje) returns (Mensaje) {}
         rpc DescargarLibro(Mensaje) returns (stream ChunkLibro){}
         rpc Propuesta (Mensaje) returns (RespPropuesta){}
         rpc PedirLibro (Mensaje) returns (Mensaje){}
