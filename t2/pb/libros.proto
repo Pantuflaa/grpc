@@ -9,6 +9,9 @@ service Libros{
         rpc DameNodos (Mensaje) returns (Mensaje) {}
         rpc DescargarLibro(Mensaje) returns (stream ChunkLibro){}
         rpc Propuesta (Mensaje) returns (RespPropuesta){}
+        rpc PropuestaDist (Mensaje) returns (RespPropuesta) {}
+        rpc EscribimeLibroDist (Escritura) returns (Mensaje) {}
+        rpc Ricart (EYR) returns (EYR) {}
         rpc PedirLibro (Mensaje) returns (Mensaje){}
         rpc Vivo (Mensaje) returns (Mensaje){}       
 }
@@ -28,4 +31,9 @@ message Mensaje{
 message RespPropuesta {
         string respuesta = 1;
         string razon = 2;
+}
+message EYR {
+        string estado = 1;
+        int32 reloj = 2;
+
 }

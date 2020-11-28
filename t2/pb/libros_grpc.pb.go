@@ -24,6 +24,9 @@ type LibrosClient interface {
 	DameNodos(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 	DescargarLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (Libros_DescargarLibroClient, error)
 	Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
+	PropuestaDist(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error)
+	EscribimeLibroDist(ctx context.Context, in *Escritura, opts ...grpc.CallOption) (*Mensaje, error)
+	Ricart(ctx context.Context, in *EYR, opts ...grpc.CallOption) (*EYR, error)
 	PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 	Vivo(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error)
 }
@@ -195,6 +198,33 @@ func (c *librosClient) Propuesta(ctx context.Context, in *Mensaje, opts ...grpc.
 	return out, nil
 }
 
+func (c *librosClient) PropuestaDist(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*RespPropuesta, error) {
+	out := new(RespPropuesta)
+	err := c.cc.Invoke(ctx, "/pb.Libros/PropuestaDist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *librosClient) EscribimeLibroDist(ctx context.Context, in *Escritura, opts ...grpc.CallOption) (*Mensaje, error) {
+	out := new(Mensaje)
+	err := c.cc.Invoke(ctx, "/pb.Libros/EscribimeLibroDist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *librosClient) Ricart(ctx context.Context, in *EYR, opts ...grpc.CallOption) (*EYR, error) {
+	out := new(EYR)
+	err := c.cc.Invoke(ctx, "/pb.Libros/Ricart", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *librosClient) PedirLibro(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Mensaje, error) {
 	out := new(Mensaje)
 	err := c.cc.Invoke(ctx, "/pb.Libros/PedirLibro", in, out, opts...)
@@ -224,6 +254,9 @@ type LibrosServer interface {
 	DameNodos(context.Context, *Mensaje) (*Mensaje, error)
 	DescargarLibro(*Mensaje, Libros_DescargarLibroServer) error
 	Propuesta(context.Context, *Mensaje) (*RespPropuesta, error)
+	PropuestaDist(context.Context, *Mensaje) (*RespPropuesta, error)
+	EscribimeLibroDist(context.Context, *Escritura) (*Mensaje, error)
+	Ricart(context.Context, *EYR) (*EYR, error)
 	PedirLibro(context.Context, *Mensaje) (*Mensaje, error)
 	Vivo(context.Context, *Mensaje) (*Mensaje, error)
 	mustEmbedUnimplementedLibrosServer()
@@ -253,6 +286,15 @@ func (UnimplementedLibrosServer) DescargarLibro(*Mensaje, Libros_DescargarLibroS
 }
 func (UnimplementedLibrosServer) Propuesta(context.Context, *Mensaje) (*RespPropuesta, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Propuesta not implemented")
+}
+func (UnimplementedLibrosServer) PropuestaDist(context.Context, *Mensaje) (*RespPropuesta, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PropuestaDist not implemented")
+}
+func (UnimplementedLibrosServer) EscribimeLibroDist(context.Context, *Escritura) (*Mensaje, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EscribimeLibroDist not implemented")
+}
+func (UnimplementedLibrosServer) Ricart(context.Context, *EYR) (*EYR, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ricart not implemented")
 }
 func (UnimplementedLibrosServer) PedirLibro(context.Context, *Mensaje) (*Mensaje, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PedirLibro not implemented")
@@ -421,6 +463,60 @@ func _Libros_Propuesta_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Libros_PropuestaDist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).PropuestaDist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/PropuestaDist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).PropuestaDist(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Libros_EscribimeLibroDist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Escritura)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).EscribimeLibroDist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/EscribimeLibroDist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).EscribimeLibroDist(ctx, req.(*Escritura))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Libros_Ricart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EYR)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LibrosServer).Ricart(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Libros/Ricart",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LibrosServer).Ricart(ctx, req.(*EYR))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Libros_PedirLibro_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Mensaje)
 	if err := dec(in); err != nil {
@@ -472,6 +568,18 @@ var _Libros_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Propuesta",
 			Handler:    _Libros_Propuesta_Handler,
+		},
+		{
+			MethodName: "PropuestaDist",
+			Handler:    _Libros_PropuestaDist_Handler,
+		},
+		{
+			MethodName: "EscribimeLibroDist",
+			Handler:    _Libros_EscribimeLibroDist_Handler,
+		},
+		{
+			MethodName: "Ricart",
+			Handler:    _Libros_Ricart_Handler,
 		},
 		{
 			MethodName: "PedirLibro",
